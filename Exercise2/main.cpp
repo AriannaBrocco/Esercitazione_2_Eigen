@@ -9,7 +9,9 @@ bool SystemSolution(const Matrix2d& A,
                     double& determinanteA,
                     double& condizionamentoA,
                     double& erroreRelativo_PALU,
-                    double& erroreRelativo_QR)
+                    double& erroreRelativo_QR,
+                    Vector2d& x_PALU,
+                    Vector2d& x_QR)
 {
     JacobiSVD<Matrix2d> svd(A);
     Vector2d valoriSingolariA = svd.singularValues();
@@ -27,10 +29,10 @@ bool SystemSolution(const Matrix2d& A,
     Vector2d xesatta;
     xesatta << -1.0e+0, -1.0e+00;
 
-    Vector2d xPALU = A.fullPivLu().solve(b);
-    Vector2d xQR = A.colPivHouseholderQr().solve(b);
-    erroreRelativo_PALU = (xesatta - xPALU).norm() / xesatta.norm();
-    erroreRelativo_QR = (xesatta - xQR).norm() / xesatta.norm();
+    x_PALU << A.fullPivLu().solve(b);
+    x_QR << A.colPivHouseholderQr().solve(b);
+    erroreRelativo_PALU = (xesatta - x_PALU).norm() / xesatta.norm();
+    erroreRelativo_QR = (xesatta - x_QR).norm() / xesatta.norm();
     return true;
 }
 
@@ -48,17 +50,16 @@ int main()
     b1 << -5.169911863249772e-01, 1.672384680188350e-01;
 
     // Calcolo la soluzione con fattorizzazione PALU e QR
-    Vector2d x_PALU = A1.fullPivLu().solve(b1);
-    Vector2d x_QR = A1.colPivHouseholderQr().solve(b1);
-
+    Vector2d x_PALU1, x_QR1;
     double detA1, condA1, errRelPALU1, errRelQR1;
-    if(SystemSolution(A1, b1, detA1, condA1, errRelPALU1, errRelQR1))
+    if(SystemSolution(A1, b1, detA1, condA1, errRelPALU1, errRelQR1, x_PALU1, x_QR1))
         cout<< scientific<< "Matrice A1 - Determinante di A1: "<< detA1<< ", condizionamento di A1: "<< 1.0 / condA1 << ", errore relativo del primo sistema con Palu: "<< errRelPALU1<< ", errore relativo del primo sistema con QR: "<< errRelQR1 << "\n"
-             << "La soluzione ottenuta con la fattorizzazione PALU e': " << x_PALU << ".\n" << "La soluzione ottenuta con la fattorizzazione QR e': " << x_QR << ".\n" << "La soluzione esatta e': " << x_esatta << "." << endl;
+             << "La soluzione ottenuta con la fattorizzazione PALU e': " << x_PALU1 << ".\n" << "La soluzione ottenuta con la fattorizzazione QR e': " << x_QR1 << ".\n" << "La soluzione esatta e': " << x_esatta << "." << endl;
 
     else
-        cout << scientific<< "Matrice A1 - Determinante di A1: "<< detA1<< ", Condizionamento di A1: "<< 1.0 / condA1 << " (La matrice è singolare)"<< endl;
+        cout << scientific<< "Matrice A1 - Determinante di A1: "<< detA1<< ", Condizionamento di A1: "<< 1.0 / condA1 << " (La matrice A1 è singolare)"<< endl;
 
+    // Stesso procedimento per gli altri due sistemi
     Matrix2d A2;
     Vector2d b2;
 
@@ -66,17 +67,14 @@ int main()
     b2 << -6.394645785530173e-04, 4.259549612877223e-04;
 
 
-    Vector2d x_PALU2 = A2.fullPivLu().solve(b2);
-    Vector2d x_QR2 = A2.colPivHouseholderQr().solve(b2);
-
-
+    Vector2d x_PALU2, x_QR2;
     double detA2, condA2, errRelPALU2, errRelQR2;
-    if(SystemSolution(A2, b2, detA2, condA2, errRelPALU2, errRelQR2))
-        cout<< scientific<< "Matrice A2 - Determinante di A2: "<< detA2<< ", condizionamento di A2: "<< 1.0 / condA2 << ", errore relativo del secondo sistema con Palu: "<< errRelPALU2<< ", errore relativo del primo sistema con QR: "<< errRelQR2 << "\n"
+    if(SystemSolution(A2, b2, detA2, condA2, errRelPALU2, errRelQR2, x_PALU2, x_QR2))
+        cout<< scientific<< "Matrice A2 - Determinante di A2: "<< detA2<< ", condizionamento di A2: "<< 1.0 / condA2 << ", errore relativo del secondo sistema con Palu: "<< errRelPALU2<< ", errore relativo del secondo sistema con QR: "<< errRelQR2 << "\n"
              << "La soluzione ottenuta con la fattorizzazione PALU e': " << x_PALU2 << ".\n" << "La soluzione ottenuta con la fattorizzazione QR e': " << x_QR2 << ".\n" << "La soluzione esatta e': " << x_esatta << "." << endl;
 
     else
-        cout << scientific<< "Matrice A2 - Determinante di A2: "<< detA2<< ", Condizionamento di A2: "<< 1.0 / condA2 << " (La matrice è singolare)"<< endl;
+        cout << scientific<< "Matrice A2 - Determinante di A2: "<< detA2<< ", Condizionamento di A2: "<< 1.0 / condA2 << " (La matrice A2 è singolare)"<< endl;
 
 
     Matrix2d A3;
@@ -85,16 +83,14 @@ int main()
     A3 << 5.547001962252291e-01,-5.547001955851905e-01, 8.320502943378437e-01,-8.320502947645361e-01;
     b3 << -6.400391328043042e-10, 4.266924591433963e-10;
 
-    Vector2d x_PALU3 = A3.fullPivLu().solve(b3);
-    Vector2d x_QR3 = A3.colPivHouseholderQr().solve(b3);
-
+    Vector2d x_PALU3, x_QR3;
     double detA3, condA3, errRelPALU3, errRelQR3;
-    if(SystemSolution(A3, b3, detA3, condA3, errRelPALU3, errRelQR3))
-        cout<< scientific<< "Matrice A3 - Determinante di A3: "<< detA3<< ", condizionamento di A3: "<< 1.0 / condA3 << ", errore relativo del primo sistema con Palu: "<< errRelPALU3<< ", errore relativo del terzo sistema con QR: "<< errRelQR3 << "\n"
+    if(SystemSolution(A3, b3, detA3, condA3, errRelPALU3, errRelQR3, x_PALU3, x_QR3))
+        cout<< scientific<< "Matrice A3 - Determinante di A3: "<< detA3<< ", condizionamento di A3: "<< 1.0 / condA3 << ", errore relativo del terzo sistema con Palu: "<< errRelPALU3<< ", errore relativo del terzo sistema con QR: "<< errRelQR3 << "\n"
              << "La soluzione ottenuta con la fattorizzazione PALU e': " << x_PALU3 << ".\n" << "La soluzione ottenuta con la fattorizzazione QR e': " << x_QR3 << ".\n" << "La soluzione esatta e': " << x_esatta << "." << endl;
 
     else
-        cout << scientific<< "Matrice A3 - Determinante di A3: "<< detA3 << ", Condizionamento di A3: "<< 1.0 / condA3 << " (La matrice è singolare)"<< endl;
+        cout << scientific<< "Matrice A3 - Determinante di A3: "<< detA3 << ", Condizionamento di A3: "<< 1.0 / condA3 << " (La matrice A3 è singolare)"<< endl;
 
     return 0;
 }
