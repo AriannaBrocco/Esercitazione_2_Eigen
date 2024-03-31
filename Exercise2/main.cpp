@@ -27,10 +27,10 @@ bool SystemSolution(const Matrix2d& A,
     }
 
     Vector2d xesatta;
-    xesatta << -1.0e+0, -1.0e+00;
+    xesatta << -1.0e+00, -1.0e+00;
 
-    x_PALU << A.fullPivLu().solve(b);
-    x_QR << A.colPivHouseholderQr().solve(b);
+    x_PALU = A.fullPivLu().solve(b);
+    x_QR = A.colPivHouseholderQr().solve(b);
     erroreRelativo_PALU = (xesatta - x_PALU).norm() / xesatta.norm();
     erroreRelativo_QR = (xesatta - x_QR).norm() / xesatta.norm();
     return true;
@@ -41,15 +41,18 @@ int main()
     // Definisco la matrice A1 e il vettore b1 per il sistema lineare
     Matrix2d A1;
     Vector2d b1;
+
+    // La soluzione esatta è la stessa per tutti e tre i sistemi
     Vector2d x_esatta;
-    x_esatta << -1.0e+0, -1.0e+00;
+    x_esatta << -1.0e+00, -1.0e+00;
 
     // Inizializzo matrice A1 e vettore b1
     A1 << 5.547001962252291e-01, -3.770900990025203e-02,
         8.320502943378437e-01, -9.992887623566787e-01;
     b1 << -5.169911863249772e-01, 1.672384680188350e-01;
 
-    // Calcolo la soluzione con fattorizzazione PALU e QR
+    // Dopo aver verificato che la matrice non sia singolare tramite SystemSolution,
+    // calcolo la soluzione con fattorizzazione PALU e QR e i relatvi errori
     Vector2d x_PALU1, x_QR1;
     double detA1, condA1, errRelPALU1, errRelQR1;
     if(SystemSolution(A1, b1, detA1, condA1, errRelPALU1, errRelQR1, x_PALU1, x_QR1))
